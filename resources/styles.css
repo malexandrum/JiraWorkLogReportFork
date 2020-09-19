@@ -1,0 +1,122 @@
+﻿/* Styel for table */
+table {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+}
+
+.mdl-data-table tbody tr:hover {
+    background-color: initial;
+}
+
+.log-header-row, .mdl-data-table tbody tr.log-header-row:hover {
+    background: linear-gradient(to bottom, #193984 0%,#ffffff 20%,#ffffff 98%,#193984 100%);
+}
+
+    .log-header-row span {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+        .log-header-row span.group-title {
+            margin-right: 40px;
+            font-weight: bold;
+        }
+
+.mdl-data-table .comment-col {
+    white-space: pre-wrap;
+}
+
+.mdl-data-table td:first-of-type, .mdl-data-table th:first-of-type {
+    padding-left: 18px;
+}
+
+.user-img {
+    width: 48px;
+    height: 48px;
+}
+
+/* Style for settings dialog and content */
+.settings-dialog {
+    width: 80%;
+}
+
+.mdl-card.list-group-item {
+    width: 100%;
+    margin-bottom: 15px;
+    min-height: 0px;
+}
+
+    .mdl-card.list-group-item .mdl-textfield {
+        margin-right: 10px;
+        width: 200px;
+    }
+
+    .mdl-card.list-group-item .mdl-textfield.config-host-container {
+        width: 300px;
+    }
+
+        .mdl-card.list-group-item .mdl-textfield label {
+            font-weight: bold;
+        }
+
+/* Style for header */
+.mdl-layout__header {
+    min-height: 46px;
+    background-color: #193984;
+}
+
+.mdl-layout__header-row {
+    height: 46px;
+}
+
+.report-config-item {
+    float: left;
+    margin-right: 20px;
+}
+
+/* Style for multi-select */
+.option-users {
+    height: 21px;
+    width: 200px;
+}
+
+.mdl-layout__header .SumoSelect {
+    color: #000;
+}
+
+.team-users > * {
+    vertical-align: middle;
+}
+
+.team-users > label {
+    margin-right: 4px;
+}
+
+.SumoSelect p {
+    font-size: inherit;
+    font-weight: initial;
+    line-height: initial;
+    padding: 1px 5px;
+}
+
+/* Misc. */
+.config-save-alert {
+    font-weight: bold;
+    color: red;
+}
+
+.jira-api-call-progress {
+    width: 100%;
+}
+
+.mdl-tooltip {
+    white-space: normal;
+    background-color: rgba(25, 57, 132, .92);
+    box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.5);
+}
+
+a {
+    color: #193984;
+}
