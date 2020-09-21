@@ -43,8 +43,11 @@
         var today = Utility.getDate(new Date());
         return new Date(today.getTime() - 29 * 24 * 3600000);
     },
-    getQuarterStartDate: function() {
-        return new Date('2020-07-01');
+    getCalendarQuarterStartDate: function() {
+        const currentTime = new Date();
+        const currentMonth = currentTime.getMonth();
+        const quarterStartMonth = currentMonth - currentMonth%3;
+        return new Date(currentTime.getFullYear(), quarterStartMonth, 1, 0, 0, 0, 0);
     },
     sum: function (arr, prop) {
         return _.reduce(arr, function (sum, elem) {

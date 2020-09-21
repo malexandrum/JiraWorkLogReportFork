@@ -17,7 +17,7 @@
                 startDate = Utility.getMonthStartDate();
                 break;
             case 'Q':
-                startDate = Utility.getQuarterStartDate();
+                startDate = Utility.getCalendarQuarterStartDate();
                 break;
             default:
                 console.error('Unknown period option: ', config.timeFrame);
@@ -141,7 +141,7 @@
         $('.report-content').html('');
         $('.jira-api-call-progress').show();
 
-        var fromDate = Utility.getMonthStartDate();
+        var fromDate = new Date(Math.min(Utility.getMonthStartDate(), Utility.getCalendarQuarterStartDate()));
         JIRA.config = selectedTeam;
         JIRA.getWorkLogs(fromDate).done(function (data) {
             $('.jira-api-call-progress').hide();
