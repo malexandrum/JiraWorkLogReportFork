@@ -6,6 +6,5 @@
 To add to chrome:
 - go to Extensions, make sure Developer Mode is enabled
 - Load Unpacked and choose the root dir of this repo
-- Invoke the extension and add your Jira url
-- NO NEED TO ADD CREDS - the extension will use the cookie, so you need to be authenticated to Jira
+- Invoke the extension and add your Jira url and API Token (get a new token from your profile)
 
