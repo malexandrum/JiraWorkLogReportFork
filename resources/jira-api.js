@@ -48,6 +48,8 @@ JIRA.getWorkLogs = function (fromDate) {
         }
 
         JIRA.restCall('worklog/list', 'POST', { "ids": ids }).done(function (logs) {
+            renderLoggedByUser(logs);
+
             var users = _.map(_.groupBy(logs, function (log) { return log.author.emailAddress; }), function (grp) {
                 var user = grp[0].author;
                 return {
@@ -86,11 +88,11 @@ JIRA.getWorkLogs = function (fromDate) {
             };
 
             function getIssuesPaginated(def, currResult) {
-                var currRequest = Object.assign({startAt: currResult.length}, request);
+                var currRequest = Object.assign({ startAt: currResult.length }, request);
                 JIRA.restCall('search', 'POST', currRequest).done(function (resp) {
                     currResult = currResult.concat(resp.issues);
 
-                    if(resp.startAt + resp.issues.length >= resp.total) {
+                    if (resp.startAt + resp.issues.length >= resp.total) {
                         def.resolve(currResult);
                     } else {
                         getIssuesPaginated(def, currResult);

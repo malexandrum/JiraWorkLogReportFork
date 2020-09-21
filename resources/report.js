@@ -9,7 +9,7 @@
     },
     getfilteredLogs: function (config) {
         var startDate;
-        switch(config.timeFrame) {
+        switch (config.timeFrame) {
             case '1WK':
                 startDate = Utility.getWeekStartDate();
                 break;
@@ -177,3 +177,68 @@ $(document).ready(function () {
         Report.selectionChanged($(this));
     });
 });
+
+function renderLoggedByUser(worklogs) {
+    var dict = {};
+    worklogs.forEach(l => {
+        const person = l.author.displayName;
+        if (!dict[person]) { dict[person] = 0; }
+        dict[person] += l.timeSpentSeconds / 3600;
+    });
+    const arr = [];
+    for (let k in dict) {
+        arr.push({ name: k, time: dict[k] });
+    }
+    arr.sort((a, b) => b.time - a.time)
+
+    const placeholder = document.querySelector('.report-config-item label');
+    const mask = document.createElement('div');
+    Object.assign(mask.style, {
+        position: 'fixed',
+        display: 'none',
+        // justifyContent: 'center',
+        // alignItems: 'center',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'black',
+        opacity: .3,
+        zIndex: 1000
+    });
+
+    const d = document.createElement('div');
+    Object.assign(d.style, {
+        position: 'fixed',
+        color: 'black',
+        padding: 10,
+        backgroundColor: 'white',
+        boxShadow: 1,
+        opacity: 1,
+        display: 'none',
+        flexDirection: 'column',
+        zIndex: 1001,
+        padding: '20px',
+        left: '50%',
+        transform: 'translate(-50%, 0)',
+        top: '100px',
+    });
+
+    arr.forEach(el => {
+        d.innerHTML += `<div style="display: flex; justify-content: space-between; margin: 0px 5px;">
+            <div>${el.name}</div>
+            <div title="${el.time}" style="margin-left: 10px;">${Math.round(el.time)}</div>
+        </div>`;
+    });
+
+    placeholder.addEventListener('click', () => {
+        mask.style.display = 'flex';
+        d.style.display = 'flex';
+    });
+
+    mask.addEventListener('click', () => {
+        mask.style.display = 'none';
+        d.style.display = 'none';
+    });
+
+    document.body.appendChild(mask);
+    document.body.appendChild(d);
+}
