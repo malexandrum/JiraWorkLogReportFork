@@ -50,12 +50,12 @@ JIRA.getWorkLogs = function (fromDate) {
         JIRA.restCall('worklog/list', 'POST', { "ids": ids }).done(function (logs) {
             renderLoggedByUser(logs);
 
-            var users = _.map(_.groupBy(logs, function (log) { return log.author.emailAddress; }), function (grp) {
+            var users = _.map(_.groupBy(logs, function (log) { return log.author.accountId; }), function (grp) {
                 var user = grp[0].author;
                 return {
-                    name: user.emailAddress,
+                    name: user.accountId,
                     displayName: user.displayName,
-                    email: user.emailAddress,
+                    email: user.accountId,
                     thumbUrl: (user.avatarUrls && user.avatarUrls["48x48"]) ? user.avatarUrls["48x48"] : ''
                 }
             });
@@ -65,7 +65,7 @@ JIRA.getWorkLogs = function (fromDate) {
             var cleanedLogs = _.map(logs, function (log) {
                 return {
                     date: Utility.getDate(log.started),
-                    username: log.author.emailAddress,
+                    username: log.author.accountId,
                     userDisplayName: log.author.displayName,
                     time: log.timeSpentSeconds,
                     comment: log.comment,
