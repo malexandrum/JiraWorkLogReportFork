@@ -14,8 +14,8 @@ JIRA.restCall = function (apiUrl, method, data) {
         beforeSend: function (xhr) {
             var base64 = window.btoa(JIRA.config.username + ":" + JIRA.config.password);
             xhr.withCredentials = true;
-            xhr.setRequestHeader("Authorization", "Basic " + base64);
-            xhr.setRequestHeader("X-Atlassian-Token", "nocheck");
+            // xhr.setRequestHeader("Authorization", "Basic " + base64);
+            // xhr.setRequestHeader("X-Atlassian-Token", "nocheck");
         }
     };
 

@@ -6,6 +6,5 @@
 To add to chrome:
 - go to Extensions, make sure Developer Mode is enabled
 - Load Unpacked and choose the root dir of this repo
-- Invoke the extension and add your Jira url and API Token (get a new token from your profile)
-To generate API Token: https://id.atlassian.com/manage-profile/security/api-tokens
+- Invoke the extension and add your Jira url. Authentication is done via cookie, so make sure you can access Jira in the same browser profile
 

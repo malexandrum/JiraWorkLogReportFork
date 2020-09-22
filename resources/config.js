@@ -55,7 +55,7 @@
 
         var $alertElement = $container.find('.config-save-alert');
 
-        if (!config.name || !config.host || !config.username || !config.password) {
+        if (!config.name || !config.host) {
             $alertElement.html("All fields are required.").show();
             return;
         }
