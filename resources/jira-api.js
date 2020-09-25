@@ -82,7 +82,8 @@ JIRA.getWorkLogs = function (fromDate) {
                 "maxResults": JIRA.const.MAX_SEARCH_RESULTS,
                 "fields": [
                     "summary",
-                    "key"
+                    "key",
+                    "parent"
                 ],
                 "fieldsByKeys": false
             };
@@ -109,7 +110,12 @@ JIRA.getWorkLogs = function (fromDate) {
                 var issues = {};
 
                 _.each(jiraIssues, function (issue) {
-                    issues[issue.id] = { key: issue.key, summary: issue.fields.summary };
+                    let parentKey, parentSummary;
+                    if (issue.fields.parent) {
+                        parentKey = issue.fields.parent.key;
+                        parentSummary = issue.fields.parent.fields.summary;
+                    }                    
+                    issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentSummary };
                 });
 
                 deferred.resolve({ users: users, logs: cleanedLogs, issues: issues });
