@@ -7,7 +7,7 @@
       "default_title": "JIRA Time"
    },
    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-   "description": "An extension that shows work log report. It fetches data from JIRA REST API.",
+   "description": "An extension that shows work log report weekly to quarterly. It fetches data from JIRA REST API.",
    "icons": {
       "128": "icons/128.png",
       "16": "icons/16.png",
@@ -15,8 +15,8 @@
    },
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhZEFrOBpHMZY59yCMLSPWs2+8qYDRGHlbcrN72ku4xwBOscBLQlorRAkdZwkiC3iODy4+ftRWVJcLfFqLz5a+0IKdtp53RWcFQ/Ggm3b7d88SUnneoTEMAshB9DXOyHeF3L4fPY7jVCyvwMIzllMKPvEeVgAzlAO4nDT9WLkTbAdQxQLKDIbyz79pz/YIaOlIIyS0oHoPy4b4AJDJ4df3L/EeWOTWQWCaqIHMAMCGZIHfDvcbcvHTWOO8/EYcpaVBXzE3yaD8M0iMS0Oxj+uQt3jq1KrK78O2pXw1hR7FqAizouwXDTBL19wAl/hjDZGoUq67axY87vlNkdE2DixWwIDAQAB",
    "manifest_version": 2,
-   "name": "JIRA Work Log Report",
+   "name": "JIRA Work Log Report - malexandrum",
    "permissions": [ "https://*.atlassian.net/", "http://*.atlassian.net/" ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "0.0.0.5"
+   "version": "1.0.0.0"
 }
