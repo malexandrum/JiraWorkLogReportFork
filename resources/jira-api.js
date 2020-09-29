@@ -1,6 +1,6 @@
 ﻿var JIRA = {
     config: { host: '', username: '', password: '' },
-    const: { MAX_SEARCH_RESULTS: 100 }
+    const: { MAX_SEARCH_RESULTS: 100, WORKLOGSPERPAGE: 1000 }
 };
 
 JIRA.restCall = function (apiUrl, method, data) {
@@ -34,97 +34,115 @@ JIRA.restCall = function (apiUrl, method, data) {
     return deferred.promise();
 };
 
-JIRA.getWorkLogs = function (fromDate) {
-    var deferred = $.Deferred();
+JIRA.getWorkLogs = function (fromDate, ids = [], deferred = $.Deferred()) {
 
     JIRA.restCall('worklog/updated?since=' + fromDate.getTime()).done(function (logIds) {
-        var ids = [];
         for (var i = 0; i < logIds.values.length; i++) {
             ids.push(logIds.values[i].worklogId);
         }
 
         if (ids.length == 0) {
             deferred.resolve({ users: [], logs: [], issues: null });
+            return;
         }
 
-        JIRA.restCall('worklog/list', 'POST', { "ids": ids }).done(function (logs) {
-            renderLoggedByUser(logs);
+        if (logIds.nextPage) {
+            const newStart = new Date(+logIds.nextPage.split('since=')[1]);
+            JIRA.getWorkLogs(newStart, ids, deferred);
+            return;
+        }
 
-            var users = _.map(_.groupBy(logs, function (log) { return log.author.accountId; }), function (grp) {
-                var user = grp[0].author;
-                return {
-                    name: user.accountId,
-                    displayName: user.displayName,
-                    email: user.accountId,
-                    thumbUrl: (user.avatarUrls && user.avatarUrls["48x48"]) ? user.avatarUrls["48x48"] : ''
-                }
-            });
-
-            var cleanedLogs = _.each(logs, function (log) { log.date = Utility.getDate(log.started); });
-
-            var cleanedLogs = _.map(logs, function (log) {
-                return {
-                    date: Utility.getDate(log.started),
-                    username: log.author.accountId,
-                    userDisplayName: log.author.displayName,
-                    time: log.timeSpentSeconds,
-                    comment: log.comment,
-                    created: log.created,
-                    issueId: log.issueId,
-                    id: log.id
-                };
-            });
-
-            //Get JIRA Issues
-            var issueIds = _.uniq(_.pluck(logs, 'issueId'));
-            var request = {
-                "jql": "id in (" + issueIds.join(',') + ") order by key DESC",
-                "maxResults": JIRA.const.MAX_SEARCH_RESULTS,
-                "fields": [
-                    "summary",
-                    "key",
-                    "parent"
-                ],
-                "fieldsByKeys": false
-            };
-
-            function getIssuesPaginated(def, currResult) {
-                var currRequest = Object.assign({ startAt: currResult.length }, request);
-                JIRA.restCall('search', 'POST', currRequest).done(function (resp) {
-                    currResult = currResult.concat(resp.issues);
-
-                    if (resp.startAt + resp.issues.length >= resp.total) {
-                        def.resolve(currResult);
-                    } else {
-                        getIssuesPaginated(def, currResult);
-                    }
-                }).fail(function (message) {
-                    def.reject(message);
-                });
-            }
-
-            var issueDeferred = $.Deferred();
-            getIssuesPaginated(issueDeferred, []);
-
-            issueDeferred.done(function (jiraIssues) {
-                var issues = {};
-
-                _.each(jiraIssues, function (issue) {
-                    let parentKey, parentSummary;
-                    if (issue.fields.parent) {
-                        parentKey = issue.fields.parent.key;
-                        parentSummary = issue.fields.parent.fields.summary;
-                    }                    
-                    issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentSummary };
-                });
-
-                deferred.resolve({ users: users, logs: cleanedLogs, issues: issues });
-            }).fail(function (message) {
-                deferred.resolve({ users: users, logs: cleanedLogs, issues: null });
-            });
-        }).fail(function (message) {
-            deferred.reject(message);
+        JIRA._listLogs(ids).then(d => {
+            deferred.resolve(d);
         });
+
+    }).fail(function (message) {
+        deferred.reject(message);
+    });
+
+    return deferred.promise();
+};
+
+JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred()) {
+
+    JIRA.restCall('worklog/list', 'POST', { ids: ids.slice(startAt, startAt + JIRA.const.WORKLOGSPERPAGE) }).done(function (l) {
+        logs = logs.concat(l);
+        if (ids.length > startAt + JIRA.const.WORKLOGSPERPAGE) {
+            return JIRA._listLogs(ids, logs, startAt + JIRA.const.WORKLOGSPERPAGE, deferred);
+        }
+
+        renderLoggedByUser(logs);
+
+        var users = _.map(_.groupBy(logs, function (log) { return log.author.accountId; }), function (grp) {
+            var user = grp[0].author;
+            return {
+                name: user.accountId,
+                displayName: user.displayName,
+                email: user.accountId,
+                thumbUrl: (user.avatarUrls && user.avatarUrls["48x48"]) ? user.avatarUrls["48x48"] : ''
+            }
+        });
+
+        var cleanedLogs = _.each(logs, function (log) { log.date = Utility.getDate(log.started); });
+
+        var cleanedLogs = _.map(logs, function (log) {
+            return {
+                date: Utility.getDate(log.started),
+                username: log.author.accountId,
+                userDisplayName: log.author.displayName,
+                time: log.timeSpentSeconds,
+                comment: log.comment,
+                created: log.created,
+                issueId: log.issueId,
+                id: log.id
+            };
+        });
+
+        //Get JIRA Issues
+        var issueIds = _.uniq(_.pluck(logs, 'issueId'));
+
+        JIRA._getIssues(issueIds).done(function (issuesArr) {
+            var issues = {};
+
+            _.each(issuesArr, function (issue) {
+                let parentKey, parentSummary;
+                if (issue.fields.parent) {
+                    parentKey = issue.fields.parent.key;
+                    parentSummary = issue.fields.parent.fields.summary;
+                }
+                issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentSummary };
+            });
+
+            deferred.resolve({ users, logs: cleanedLogs, issues });
+        });
+    }).fail(function (message) {
+        deferred.resolve({ users: users, logs: cleanedLogs, issues: null });
+    });
+
+    return deferred.promise();
+}
+
+JIRA._getIssues = function (issueIds, issues = [], deferred = $.Deferred()) {
+    var request = {
+        jql: "id in (" + issueIds.join(',') + ") order by key DESC",
+        maxResults: JIRA.const.MAX_SEARCH_RESULTS,
+        fields: [
+            "summary",
+            "key",
+            "parent"
+        ],
+        fieldsByKeys: false,
+        startAt: issues.length
+    };
+
+    JIRA.restCall('search', 'POST', request).done(function (resp) {
+        issues = issues.concat(resp.issues);
+
+        if (issues.length >= resp.total) {
+            deferred.resolve(issues);
+        } else {
+            JIRA._getIssues(issueIds, issues, deferred);
+        }
     }).fail(function (message) {
         deferred.reject(message);
     });
