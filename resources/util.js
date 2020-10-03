@@ -43,11 +43,16 @@
         var today = Utility.getDate(new Date());
         return new Date(today.getTime() - 29 * 24 * 3600000);
     },
-    getCalendarQuarterStartDate: function() {
+    getCalendarQuarterStartDate: function () {
         const currentTime = new Date();
         const currentMonth = currentTime.getMonth();
-        const quarterStartMonth = currentMonth - currentMonth%3;
+        const quarterStartMonth = currentMonth - currentMonth % 3;
         return new Date(currentTime.getFullYear(), quarterStartMonth, 1, 0, 0, 0, 0);
+    },
+    getCalendarPreviousQuarterStartDate: function () {
+        const result = this.getCalendarQuarterStartDate();
+        result.setMonth(result.getMonth() - 3);
+        return result;
     },
     sum: function (arr, prop) {
         return _.reduce(arr, function (sum, elem) {

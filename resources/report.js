@@ -8,7 +8,15 @@
         };
     },
     getfilteredLogs: function (config) {
-        var startDate;
+        var { startDate, endDate } = this.getStartEndDates();
+        var selectedUsers = Configuration.getUserSelection(window.localStorage.getItem('selected_team_id'));
+        return _.filter(Report.data.logs, function (log) {
+            return log.date >= startDate && (endDate ? log.date < endDate : true) && (selectedUsers == null || _.indexOf(selectedUsers, log.username) > -1);
+        });
+    },
+    getStartEndDates: function () {
+        var startDate, endDate;
+        var config = Report.getRenderConfig();
         switch (config.timeFrame) {
             case '1WK':
                 startDate = Utility.getWeekStartDate();
@@ -19,13 +27,14 @@
             case 'Q':
                 startDate = Utility.getCalendarQuarterStartDate();
                 break;
+            case 'PQ':
+                startDate = Utility.getCalendarPreviousQuarterStartDate();
+                endDate = Utility.getCalendarQuarterStartDate();
+                break;
             default:
                 console.error('Unknown period option: ', config.timeFrame);
         }
-        var selectedUsers = Configuration.getUserSelection(window.localStorage.getItem('selected_team_id'));
-        return _.filter(Report.data.logs, function (log) {
-            return log.date >= startDate && (selectedUsers == null || _.indexOf(selectedUsers, log.username) > -1);
-        });
+        return { startDate, endDate };
     },
     getLogsGroupedByUser(logs, config) {
         var reportData = [];
@@ -94,7 +103,7 @@
             Report.renderLogs();
         }
         else {
-            Report.renderLogs();
+            Report.renderPage();
         }
     },
     renderUserSelect: function () {
@@ -141,9 +150,12 @@
         $('.report-content').html('');
         $('.jira-api-call-progress').show();
 
-        var fromDate = new Date(Math.min(Utility.getMonthStartDate(), Utility.getCalendarQuarterStartDate()));
+
+        var { startDate, endDate } = this.getStartEndDates();
+
+        // var fromDate = new Date(Math.min(Utility.getMonthStartDate(), Utility.getCalendarQuarterStartDate()));
         JIRA.config = selectedTeam;
-        JIRA.getWorkLogs(fromDate).done(function (data) {
+        JIRA.getWorkLogs(startDate, endDate).done(function (data) {
             $('.jira-api-call-progress').hide();
             $(".report-config-item").show();
 
@@ -179,6 +191,11 @@ $(document).ready(function () {
 });
 
 function renderLoggedByUser(worklogs) {
+    const disposable1 = document.getElementById('aggregate-mask');
+    if (disposable1) { disposable1.remove() }
+    const disposable2 = document.getElementById('aggregate');
+    if (disposable2) { disposable2.remove(); }
+
     var dict = {};
     worklogs.forEach(l => {
         const person = l.author.displayName;
@@ -193,11 +210,10 @@ function renderLoggedByUser(worklogs) {
 
     const placeholder = document.querySelector('.report-config-item label');
     const mask = document.createElement('div');
-    Object.assign(mask.style, {
+    mask.id = 'aggregate-mask'
+    Object.assign(mask.style, {        
         position: 'fixed',
         display: 'none',
-        // justifyContent: 'center',
-        // alignItems: 'center',
         width: '100%',
         height: '100%',
         backgroundColor: 'black',
@@ -206,6 +222,7 @@ function renderLoggedByUser(worklogs) {
     });
 
     const d = document.createElement('div');
+    d.id = 'aggregate';
     Object.assign(d.style, {
         position: 'fixed',
         color: 'black',
@@ -233,6 +250,8 @@ function renderLoggedByUser(worklogs) {
         mask.style.display = 'flex';
         d.style.display = 'flex';
     });
+
+    placeholder.style.cursor = 'context-menu';
 
     mask.addEventListener('click', () => {
         mask.style.display = 'none';

@@ -34,7 +34,7 @@ JIRA.restCall = function (apiUrl, method, data) {
     return deferred.promise();
 };
 
-JIRA.getWorkLogs = function (fromDate, ids = [], deferred = $.Deferred()) {
+JIRA.getWorkLogs = function (fromDate, toDate, ids = [], deferred = $.Deferred()) {
 
     JIRA.restCall('worklog/updated?since=' + fromDate.getTime()).done(function (logIds) {
         for (var i = 0; i < logIds.values.length; i++) {
@@ -48,11 +48,11 @@ JIRA.getWorkLogs = function (fromDate, ids = [], deferred = $.Deferred()) {
 
         if (logIds.nextPage) {
             const newStart = new Date(+logIds.nextPage.split('since=')[1]);
-            JIRA.getWorkLogs(newStart, ids, deferred);
+            JIRA.getWorkLogs(newStart, null, ids, deferred);
             return;
         }
 
-        JIRA._listLogs(ids).then(d => {
+        JIRA._listLogs(ids, undefined, 0).then(d => {
             deferred.resolve(d);
         });
 
@@ -65,8 +65,14 @@ JIRA.getWorkLogs = function (fromDate, ids = [], deferred = $.Deferred()) {
 
 JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred()) {
 
+    const { startDate, endDate } = Report.getStartEndDates();
+
     JIRA.restCall('worklog/list', 'POST', { ids: ids.slice(startAt, startAt + JIRA.const.WORKLOGSPERPAGE) }).done(function (l) {
-        logs = logs.concat(l);
+        const filteredLogs = l.filter(log => {
+            const logDate = new Date(log.started);
+            return logDate >= startDate && (endDate ? logDate < endDate : true);
+        })
+        logs = logs.concat(filteredLogs);
         if (ids.length > startAt + JIRA.const.WORKLOGSPERPAGE) {
             return JIRA._listLogs(ids, logs, startAt + JIRA.const.WORKLOGSPERPAGE, deferred);
         }
@@ -83,7 +89,7 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
             }
         });
 
-        var cleanedLogs = _.each(logs, function (log) { log.date = Utility.getDate(log.started); });
+        // var cleanedLogs = _.each(logs, function (log) { log.date = Utility.getDate(log.started); });
 
         var cleanedLogs = _.map(logs, function (log) {
             return {
