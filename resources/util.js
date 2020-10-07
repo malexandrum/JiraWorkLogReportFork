@@ -63,17 +63,18 @@
         if (Report.data.issues && Report.data.issues[log.issueId]) {
             var issue = Report.data.issues[log.issueId];
             var jiraLink = JIRA.config.host + "/browse/" + issue.key;
-            let result = "";
-            if (issue.parentKey) {
-                const jiraParentLink = JIRA.config.host + "/browse/" + issue.parentKey;
-                result += `<span class="mdl-chip" id="parent-${log.id}"><a target=_blank href="${jiraParentLink}" class="mdl-chip__text">${issue.parentKey}</a></span>
-                <div class="mdl-tooltip mdl-tooltip--large" data-mdl-for="parent-${log.id}">${issue.parentSummary}</div> / `;
-            }
-            result += "<span class='mdl-chip' id='log" + log.id + "'><a target='_blank' href='" + jiraLink + "' class='mdl-chip__text'>" + issue.key + "</a></span>"
-                + "<div class='mdl-tooltip mdl-tooltip--large' data-mdl-for='log" + log.id + "'>" + issue.summary + "</div>";
-            return result;
+
+            return "<span class='mdl-chip' id='log" + log.id + "'><a target='_blank' href='" + jiraLink + "' class='mdl-chip__text'>" + issue.key + "</a></span>"
+                + "<div>" + issue.summary || '' + "</div>";
         }
 
         return "";
+    },
+    getParent: function (log) {
+        const issue = Report.data.issues[log.issueId];
+        const jiraParentLink = JIRA.config.host + "/browse/" + issue.parentKey;
+
+        return issue.parentKey ? `<span class="mdl-chip" id="parent-${log.id}"><a target="_blank" href="${jiraParentLink}" class="mdl-chip__text">${issue.parentKey}</a></span>
+                <div>${issue.parentSummary || ''}</div>` : '';
     }
 }

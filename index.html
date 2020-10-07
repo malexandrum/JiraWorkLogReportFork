@@ -129,6 +129,7 @@
                     <th colspan="4">Log Entries</th>
                 </tr>
                 <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Parent</th>
                     <th class="mdl-data-table__cell--non-numeric">Issue</th>
                     <th class="mdl-data-table__cell--non-numeric">Comment</th>
                     <th>Time Spent</th>
@@ -140,7 +141,7 @@
                 var logGroup = data[i];
                 %>
                 <tr class="log-header-row">
-                    <td colspan="6" class="mdl-data-table__cell--non-numeric">
+                    <td colspan="7" class="mdl-data-table__cell--non-numeric">
                         <img class="user-img" src="<%= users[logGroup.username].thumbUrl %>" />
                         <span class="group-title"><%= users[logGroup.username].displayName %></span>
                         <span>Total: <%= Utility.getTimeFormatted(logGroup.totalTime) %></span>
@@ -153,6 +154,7 @@
                 <tr>
                     <td class="mdl-data-table__cell--non-numeric" rowspan="<%= numLogs %>"><%= Utility.getDateFormatted(dailyLog.date) %></td>
                     <td rowspan="<%= numLogs %>"><%= Utility.getTimeFormatted(dailyLog.totalTime) %></td>
+                    <td class="mdl-data-table__cell--non-numeric"><%= Utility.getParent(dailyLog.logs[0]) %></td>
                     <td class="mdl-data-table__cell--non-numeric"><%= Utility.getIssue(dailyLog.logs[0]) %></td>
                     <td class="mdl-data-table__cell--non-numeric comment-col"><%= dailyLog.logs[0].comment %></td>
                     <td><%= Utility.getTimeFormatted(dailyLog.logs[0].time) %></td>
@@ -162,6 +164,7 @@
                 var log = dailyLog.logs[k];
                 %>
                 <tr>
+                    <td class="mdl-data-table__cell--non-numeric"><%= Utility.getParent(dailyLog.logs[0]) %></td>
                     <td class="mdl-data-table__cell--non-numeric"><%= Utility.getIssue(log) %></td>
                     <td class="mdl-data-table__cell--non-numeric comment-col"><%= log.comment %></td>
                     <td><%= Utility.getTimeFormatted(log.time) %></td>
