@@ -102,6 +102,9 @@
             Configuration.saveUserSelection(window.localStorage.getItem('selected_team_id'), currentSelection);
             Report.renderLogs();
         }
+        else if ($item.hasClass('option-group-by')) {
+            Report.renderLogs();
+        } 
         else {
             Report.renderPage();
         }
