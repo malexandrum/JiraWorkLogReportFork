@@ -65,7 +65,7 @@
             var jiraLink = JIRA.config.host + "/browse/" + issue.key;
 
             return "<span class='mdl-chip' id='log" + log.id + "'><a target='_blank' href='" + jiraLink + "' class='mdl-chip__text'>" + issue.key + "</a></span>"
-                + "<div>" + this.keepFirstN(issue.summary, 60) || '' + "</div>";
+                + "<div>" + this.keepFirstN(issue.summary, 256) || '' + "</div>";
         }
 
         return "";
@@ -75,7 +75,7 @@
         const jiraParentLink = JIRA.config.host + "/browse/" + issue.parentKey;
 
         return issue.parentKey ? `<span class="mdl-chip" id="parent-${log.id}"><a target="_blank" href="${jiraParentLink}" class="mdl-chip__text">${issue.parentKey}</a></span>
-                <div>${this.keepFirstN(issue.parentSummary, 60) || ''}</div>` : '';
+                <div>${this.keepFirstN(issue.parentSummary, 256) || ''}</div>` : '';
     },
     keepFirstN: function (t, n = 32) {
         if (t) {
