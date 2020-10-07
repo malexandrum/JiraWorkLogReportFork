@@ -164,11 +164,11 @@
                 var log = dailyLog.logs[k];
                 %>
                 <tr>
-                    <td class="mdl-data-table__cell--non-numeric"><%= Utility.getParent(log) %></td>
-                    <td class="mdl-data-table__cell--non-numeric"><%= Utility.getIssue(log) %></td>
-                    <td class="mdl-data-table__cell--non-numeric comment-col"><%= log.comment %></td>
-                    <td><%= Utility.getTimeFormatted(log.time) %></td>
-                    <td><%= Utility.getDateFormatted(log.created) %></td>
+                    <td width="30%" class="mdl-data-table__cell--non-numeric"><%= Utility.getParent(log) %></td>
+                    <td width="30%" class="mdl-data-table__cell--non-numeric"><%= Utility.getIssue(log) %></td>
+                    <td width="10%" class="mdl-data-table__cell--non-numeric comment-col"><%= log.comment %></td>
+                    <td width="8%" ><%= Utility.getTimeFormatted(log.time) %></td>
+                    <td width="8%" ><%= Utility.getDateFormatted(log.created) %></td>
                 </tr>
                 <% } %>
                 <% } %>
