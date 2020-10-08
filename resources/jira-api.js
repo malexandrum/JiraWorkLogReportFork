@@ -112,11 +112,16 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
 
             _.each(issuesArr, function (issue) {
                 let parentKey, parentSummary;
+                let status, parentStatus;
                 if (issue.fields.parent) {
                     parentKey = issue.fields.parent.key;
                     parentSummary = issue.fields.parent.fields.summary;
+                    parentStatus = issue.fields.parent.fields && issue.fields.parent.fields.status.name
                 }
-                issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentSummary };
+                if (issue.fields && issue.fields.status) {
+                    status = issue.fields.status.name;
+                }
+                issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentSummary, status, parentStatus };
             });
 
             deferred.resolve({ users, logs: cleanedLogs, issues });
@@ -135,7 +140,8 @@ JIRA._getIssues = function (issueIds, issues = [], deferred = $.Deferred()) {
         fields: [
             "summary",
             "key",
-            "parent"
+            "parent",
+            "status"
         ],
         fieldsByKeys: false,
         startAt: issues.length

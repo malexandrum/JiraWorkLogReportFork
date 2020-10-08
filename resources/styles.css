@@ -128,3 +128,12 @@ table td {
 a {
     color: #193984;
 }
+
+.issue-status {
+    background-color: gray;
+    padding: 4px;
+    border-radius: 3px;
+    color: white;
+    font-size: smaller;
+    margin-left: 4px;
+}
