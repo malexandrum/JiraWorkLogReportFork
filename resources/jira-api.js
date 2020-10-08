@@ -87,7 +87,7 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
                 email: user.accountId,
                 thumbUrl: (user.avatarUrls && user.avatarUrls["48x48"]) ? user.avatarUrls["48x48"] : ''
             }
-        });
+        }).sort((a, b) => a.displayName > b.displayName ? 1 : -1);
 
         // var cleanedLogs = _.each(logs, function (log) { log.date = Utility.getDate(log.started); });
 
