@@ -147,3 +147,19 @@ a {
               user-select: none; /* Non-prefixed version, currently
                                     supported by Chrome, Edge, Opera and Firefox */
   }
+
+  #aggregate {
+      max-height: 85%;
+      overflow-y: auto;
+  }
+
+  #aggregate table {
+      border-collapse: collapse;
+      width: auto;
+      margin-bottom: 0;
+  }
+
+  #aggregate table, #aggregate td, #aggregate th {
+    border: 1px solid gray;
+    padding: 1px 5px;
+}

@@ -89,8 +89,6 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
             }
         }).sort((a, b) => a.displayName > b.displayName ? 1 : -1);
 
-        // var cleanedLogs = _.each(logs, function (log) { log.date = Utility.getDate(log.started); });
-
         var cleanedLogs = _.map(logs, function (log) {
             return {
                 date: Utility.getDate(log.started),
@@ -112,16 +110,28 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
 
             _.each(issuesArr, function (issue) {
                 let parentKey, parentSummary;
-                let status, parentStatus;
-                if (issue.fields.parent) {
-                    parentKey = issue.fields.parent.key;
-                    parentSummary = issue.fields.parent.fields.summary;
-                    parentStatus = issue.fields.parent.fields && issue.fields.parent.fields.status.name
+                let status, parentStatus, project, issueType;
+                if (issue.fields) {
+                    if (issue.fields.parent) {
+                        parentId = issue.fields.parent.id;
+                        parentKey = issue.fields.parent.key;
+                        parentSummary = issue.fields.parent.fields.summary;
+                        parentStatus = issue.fields.parent.fields && issue.fields.parent.fields.status.name
+                        if (!issues[parentId]) {
+                            issues[parentId] = { key: parentKey, summary: parentSummary, project: issue.fields.parent.fields.project, issueType: issue.fields.parent.fields.issuetype }
+                        }
+                    }
+                    if (issue.fields.status) {
+                        status = issue.fields.status.name;
+                    }
+                    if (issue.fields.project) {
+                        project = issue.fields.project;
+                    }
+                    if (issue.fields.issuetype) {
+                        issueType = issue.fields.issuetype;
+                    }
                 }
-                if (issue.fields && issue.fields.status) {
-                    status = issue.fields.status.name;
-                }
-                issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentSummary, status, parentStatus };
+                issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentId, parentSummary, status, parentStatus, project, issueType };
             });
 
             deferred.resolve({ users, logs: cleanedLogs, issues });
@@ -141,7 +151,9 @@ JIRA._getIssues = function (issueIds, issues = [], deferred = $.Deferred()) {
             "summary",
             "key",
             "parent",
-            "status"
+            "status",
+            "project",
+            "issuetype"
         ],
         fieldsByKeys: false,
         startAt: issues.length

@@ -104,7 +104,7 @@
         }
         else if ($item.hasClass('option-group-by')) {
             Report.renderLogs();
-        } 
+        }
         else {
             Report.renderPage();
         }
@@ -170,6 +170,7 @@
             }
             Report.renderUserSelect();
             Report.renderLogs();
+            renderLoggedByProjectIssueType(data.logs, data.issues)
         }).fail(function (errorText) {
             $('.jira-api-call-progress').hide();
             $(".report-config-item:not(:first-child)").hide();
@@ -214,7 +215,7 @@ function renderLoggedByUser(worklogs) {
     const placeholder = document.querySelector('.report-config-item label');
     const mask = document.createElement('div');
     mask.id = 'aggregate-mask'
-    Object.assign(mask.style, {        
+    Object.assign(mask.style, {
         position: 'fixed',
         display: 'none',
         width: '100%',
@@ -242,11 +243,14 @@ function renderLoggedByUser(worklogs) {
         top: '100px',
     });
 
+    const t = document.createElement('table');
+    d.appendChild(t);
+
     arr.forEach(el => {
-        d.innerHTML += `<div style="display: flex; justify-content: space-between; margin: 0px 5px;">
-            <div>${el.name}</div>
-            <div title="${el.time}" style="margin-left: 10px;">${Math.round(el.time)}</div>
-        </div>`;
+        t.innerHTML += `<tr>
+            <td>${el.name}</td>
+            <td style="text-align: right;">${el.time.toFixed(2)}</td>
+        </tr>`;
     });
 
     placeholder.addEventListener('click', () => {
@@ -263,4 +267,90 @@ function renderLoggedByUser(worklogs) {
 
     document.body.appendChild(mask);
     document.body.appendChild(d);
+}
+
+function renderLoggedByProjectIssueType(logs, issues) {
+    Report.data.allLogs = logs.map(l => ({ logId: l.id, issueId: l.issueId, issue: issues[l.issueId], issueKey: issues[l.issueId].key, time: l.time }))
+    const loggedByProjectIssueType = {}, projectsById = {}, issueTypesById = {};
+    logs.forEach(log => {
+        let issue = issues[log.issueId];
+        const key = issue.key;
+        let { project, issueType } = issue;
+        if (issue.parentId && issues[issue.parentId].issueType.name !== 'Epic') {
+            issueType = issues[issue.parentId].issueType
+        }
+        projectsById[project.id] = project;
+        issueTypesById[issueType.id] = issueType;
+        if (loggedByProjectIssueType[project.id]) {
+            if (loggedByProjectIssueType[project.id][issueType.id]) {
+                loggedByProjectIssueType[project.id][issueType.id].time += log.time;
+                loggedByProjectIssueType[project.id][issueType.id].issueKeys.push(key);
+            } else {
+                loggedByProjectIssueType[project.id][issueType.id] = { time: log.time, issueKeys: [key] };
+            }
+        } else {
+            loggedByProjectIssueType[project.id] = { [issueType.id]: { time: log.time, issueKeys: [key] } }
+        }
+
+    });
+
+    Report.data.loggedByProject = loggedByProjectIssueType;
+
+    const el = document.getElementById('aggregate');
+    el.insertAdjacentHTML('beforeend', '<br>');
+
+    const t1 = document.createElement('table');
+
+    t1.insertAdjacentHTML('afterbegin', `<tr><th>Project</th><th>Issue Type</th><th>Hours</th><th>Issues</th></tr>`);
+
+    const lines = [];
+
+    for (const projectId in loggedByProjectIssueType) {
+        const project = projectsById[projectId];
+
+        const projectLines = []
+        for (const issueTypeId in loggedByProjectIssueType[projectId]) {
+            const issueType = issueTypesById[issueTypeId];
+            const time = loggedByProjectIssueType[projectId][issueTypeId].time;
+            const issueKeys = loggedByProjectIssueType[projectId][issueTypeId].issueKeys;
+            projectLines.push({
+                project: project.name,
+                issueType: issueType.name,
+                time,
+                issueKeys
+            });
+        }
+        projectLines.sort((a, b) => b.time - a.time)
+        lines.push(...projectLines);
+    }
+
+    let projectName;
+    lines.forEach(l => {
+        const { project, issueType, time } = l;
+        let tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        // td1.rowSpan = Object.keys(loggedByProjectIssueType[projectId]).length;
+        td1.innerHTML = project;
+        if (project === projectName) {
+            td1.style.opacity = .3
+        }
+        projectName = project;
+
+        tr.appendChild(td1);
+        const td2 = document.createElement('td');
+        td2.innerHTML = issueType
+        tr.appendChild(td2);
+        const td3 = document.createElement('td');
+        td3.innerHTML = (time / 3600).toFixed(2);
+        td3.style.textAlign = 'right';
+        tr.appendChild(td3);
+        const td4 = document.createElement('td');
+        td4.innerHTML = l.issueKeys.map(ik => (`<a target=_blank href="https://cakemarketing.atlassian.net/browse/${ik}">${ik}</a>`)).join(' ');
+        tr.appendChild(td4)
+        t1.appendChild(tr)
+    });
+
+
+    el.appendChild(t1);
+
 }
