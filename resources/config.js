@@ -9,6 +9,7 @@
         window.localStorage.setItem('user-selection-team-' + teamId, JSON.stringify(savedSelections));
     },
     getUserSelection: function (teamId) {
+        teamId = teamId || window.localStorage.getItem('selected_team_id');
         var configs = window.localStorage.getItem('user-selection-team-' + teamId);
         if (configs) {
             return JSON.parse(configs);

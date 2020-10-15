@@ -92,6 +92,10 @@
 
         $('.report-content').html(template({ data: reportData, users: Report.data.usersByName }));
         componentHandler.upgradeAllRegistered();
+
+        renderAggregatesContainer();
+        renderLoggedByProjectIssueType(logs, Report.data.issues)
+        renderLoggedByUser(logs)
     },
     selectionChanged: function ($item) {
         if ($item.hasClass('option-team')) {
@@ -170,10 +174,6 @@
             }
             Report.renderUserSelect();
             Report.renderLogs();
-
-            renderAggregatesContainer();
-            renderLoggedByProjectIssueType(data.logs, data.issues)
-            renderLoggedByUser(data.logs)
 
         }).fail(function (errorText) {
             $('.jira-api-call-progress').hide();
