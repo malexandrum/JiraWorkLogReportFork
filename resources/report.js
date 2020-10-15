@@ -170,7 +170,11 @@
             }
             Report.renderUserSelect();
             Report.renderLogs();
+
+            renderAggregatesContainer();
             renderLoggedByProjectIssueType(data.logs, data.issues)
+            renderLoggedByUser(data.logs)
+
         }).fail(function (errorText) {
             $('.jira-api-call-progress').hide();
             $(".report-config-item:not(:first-child)").hide();
@@ -194,36 +198,11 @@ $(document).ready(function () {
     });
 });
 
-function renderLoggedByUser(worklogs) {
+function renderAggregatesContainer() {
     const disposable1 = document.getElementById('aggregate-mask');
     if (disposable1) { disposable1.remove() }
     const disposable2 = document.getElementById('aggregate');
     if (disposable2) { disposable2.remove(); }
-
-    var dict = {};
-    worklogs.forEach(l => {
-        const person = l.author.displayName;
-        if (!dict[person]) { dict[person] = 0; }
-        dict[person] += l.timeSpentSeconds / 3600;
-    });
-    const arr = [];
-    for (let k in dict) {
-        arr.push({ name: k, time: dict[k] });
-    }
-    arr.sort((a, b) => b.time - a.time)
-
-    const placeholder = document.querySelector('.report-config-item label');
-    const mask = document.createElement('div');
-    mask.id = 'aggregate-mask'
-    Object.assign(mask.style, {
-        position: 'fixed',
-        display: 'none',
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'black',
-        opacity: .3,
-        zIndex: 1000
-    });
 
     const d = document.createElement('div');
     d.id = 'aggregate';
@@ -243,14 +222,17 @@ function renderLoggedByUser(worklogs) {
         top: '100px',
     });
 
-    const t = document.createElement('table');
-    d.appendChild(t);
-
-    arr.forEach(el => {
-        t.innerHTML += `<tr>
-            <td>${el.name}</td>
-            <td style="text-align: right;">${el.time.toFixed(2)}</td>
-        </tr>`;
+    const placeholder = document.querySelector('.report-config-item label');
+    const mask = document.createElement('div');
+    mask.id = 'aggregate-mask'
+    Object.assign(mask.style, {
+        position: 'fixed',
+        display: 'none',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'black',
+        opacity: .3,
+        zIndex: 1000
     });
 
     placeholder.addEventListener('click', () => {
@@ -267,16 +249,43 @@ function renderLoggedByUser(worklogs) {
 
     document.body.appendChild(mask);
     document.body.appendChild(d);
+
+}
+
+function renderLoggedByUser(worklogs) {
+    var dict = {};
+    worklogs.forEach(l => {
+        const person = l.userDisplayName;
+        if (!dict[person]) { dict[person] = 0; }
+        dict[person] += l.time / 3600;
+    });
+    const arr = [];
+    for (let k in dict) {
+        arr.push({ name: k, time: dict[k] });
+    }
+    arr.sort((a, b) => b.time - a.time)
+
+    const d = document.getElementById('aggregate');
+    d.insertAdjacentHTML('beforeend', `<br>`);
+
+    const t = document.createElement('table');
+    d.appendChild(t);
+
+    arr.forEach(el => {
+        t.innerHTML += `<tr>
+            <td>${el.name}</td>
+            <td style="text-align: right;">${el.time.toFixed(2)}</td>
+        </tr>`;
+    });
 }
 
 function renderLoggedByProjectIssueType(logs, issues) {
-    Report.data.allLogs = logs.map(l => ({ logId: l.id, issueId: l.issueId, issue: issues[l.issueId], issueKey: issues[l.issueId].key, time: l.time }))
     const loggedByProjectIssueType = {}, projectsById = {}, issueTypesById = {};
     logs.forEach(log => {
         let issue = issues[log.issueId];
         const key = issue.key;
         let { project, issueType } = issue;
-        if (issue.parentId && issues[issue.parentId].issueType.name !== 'Epic') {
+        if (issue.parentKey && issues[issue.parentId].issueType.name !== 'Epic') {
             issueType = issues[issue.parentId].issueType
         }
         projectsById[project.id] = project;
@@ -284,7 +293,9 @@ function renderLoggedByProjectIssueType(logs, issues) {
         if (loggedByProjectIssueType[project.id]) {
             if (loggedByProjectIssueType[project.id][issueType.id]) {
                 loggedByProjectIssueType[project.id][issueType.id].time += log.time;
-                loggedByProjectIssueType[project.id][issueType.id].issueKeys.push(key);
+                if (loggedByProjectIssueType[project.id][issueType.id].issueKeys.indexOf(key) === -1) {
+                    loggedByProjectIssueType[project.id][issueType.id].issueKeys.push(key);
+                }
             } else {
                 loggedByProjectIssueType[project.id][issueType.id] = { time: log.time, issueKeys: [key] };
             }
@@ -325,6 +336,9 @@ function renderLoggedByProjectIssueType(logs, issues) {
     }
 
     let projectName;
+
+    const config = Configuration.getCurrentConfig();
+
     lines.forEach(l => {
         const { project, issueType, time } = l;
         let tr = document.createElement('tr');
@@ -345,12 +359,32 @@ function renderLoggedByProjectIssueType(logs, issues) {
         td3.style.textAlign = 'right';
         tr.appendChild(td3);
         const td4 = document.createElement('td');
-        td4.innerHTML = l.issueKeys.map(ik => (`<a target=_blank href="https://cakemarketing.atlassian.net/browse/${ik}">${ik}</a>`)).join(' ');
+        td4.style.fontSize = 'smaller';
+        td4.innerHTML = sortIssueKeys(l.issueKeys).map(ik => (`<a target=_blank href="${config.host}/browse/${ik}">${ik}</a>`)).join(' ');
         tr.appendChild(td4)
         t1.appendChild(tr)
     });
 
 
     el.appendChild(t1);
+
+    function sortIssueKeys(arr) {
+        arr.sort((a, b) => {
+            const normalizedA = normalizeIssueKey(a);
+            const normalizedB = normalizeIssueKey(b);
+            if (normalizedA < normalizedB) {
+                return -1;
+            } else if (normalizedA === normalizedB) {
+                return 0;
+            }
+            return 1;
+        })
+        return arr;
+    }
+
+    function normalizeIssueKey(k) {
+        const split = k.split('-');
+        return `${split[0]}-` + `${split[1]}`.padStart(10, '0')
+    }
 
 }

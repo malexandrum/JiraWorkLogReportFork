@@ -12,7 +12,7 @@ JIRA.restCall = function (apiUrl, method, data) {
         crossDomain: true,
         contentType: "application/json",
         beforeSend: function (xhr) {
-            var base64 = window.btoa(JIRA.config.username + ":" + JIRA.config.password);
+            // var base64 = window.btoa(JIRA.config.username + ":" + JIRA.config.password);
             xhr.withCredentials = true;
             // xhr.setRequestHeader("Authorization", "Basic " + base64);
             // xhr.setRequestHeader("X-Atlassian-Token", "nocheck");
@@ -76,8 +76,6 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
         if (ids.length > startAt + JIRA.const.WORKLOGSPERPAGE) {
             return JIRA._listLogs(ids, logs, startAt + JIRA.const.WORKLOGSPERPAGE, deferred);
         }
-
-        renderLoggedByUser(logs);
 
         var users = _.map(_.groupBy(logs, function (log) { return log.author.accountId; }), function (grp) {
             var user = grp[0].author;

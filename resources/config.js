@@ -44,6 +44,19 @@
             return [];
         }
     },
+    getCurrentConfig: function() {
+        const configs = window.localStorage.getItem('host-configs');
+        if (configs) {
+            const parsedConfigs = JSON.parse(configs);
+            const selectedTeam = window.localStorage.getItem('selected_team_id');
+            for (let c of parsedConfigs) {
+                if (`${c.id}` === selectedTeam) {
+                    return c;
+                }
+            }
+        }
+        return {};
+    },
     saveConfig: function ($container) {
         var config = {
             id: parseInt($container.data('id')),
