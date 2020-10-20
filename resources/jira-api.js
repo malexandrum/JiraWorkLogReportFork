@@ -1,4 +1,6 @@
-﻿var JIRA = {
+﻿"use strict";
+
+var JIRA = {
     config: { host: '', username: '', password: '' },
     const: { MAX_SEARCH_RESULTS: 100, WORKLOGSPERPAGE: 1000 }
 };
@@ -107,7 +109,7 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
             var issues = {};
 
             _.each(issuesArr, function (issue) {
-                let parentKey, parentSummary;
+                let parentKey, parentSummary, parentId;
                 let status, parentStatus, project, issueType;
                 if (issue.fields) {
                     if (issue.fields.parent) {
