@@ -110,19 +110,21 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
 
             _.each(issuesArr, function (issue) {
                 let parentKey, parentSummary, parentId;
-                let status, parentStatus, project, issueType;
+                let status, statusColor = 'grey', parentStatus, parentStatusColor = 'grey', project, issueType;
                 if (issue.fields) {
                     if (issue.fields.parent) {
                         parentId = issue.fields.parent.id;
                         parentKey = issue.fields.parent.key;
                         parentSummary = issue.fields.parent.fields.summary;
                         parentStatus = issue.fields.parent.fields && issue.fields.parent.fields.status.name
+                        parentStatusColor = issue.fields.parent.fields && issue.fields.parent.fields.status.statusCategory.colorName
                         if (!issues[parentId]) {
-                            issues[parentId] = { key: parentKey, summary: parentSummary, project: issue.fields.parent.fields.project, issueType: issue.fields.parent.fields.issuetype }
+                            issues[parentId] = { key: parentKey, summary: parentSummary, project: issue.fields.parent.fields.project, issueType: issue.fields.parent.fields.issuetype, status: parentStatus, statusColor: parentStatusColor }
                         }
                     }
                     if (issue.fields.status) {
                         status = issue.fields.status.name;
+                        statusColor = issue.fields.status.statusCategory.colorName
                     }
                     if (issue.fields.project) {
                         project = issue.fields.project;
@@ -131,7 +133,19 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
                         issueType = issue.fields.issuetype;
                     }
                 }
-                issues[issue.id] = { key: issue.key, summary: issue.fields.summary, parentKey, parentId, parentSummary, status, parentStatus, project, issueType };
+                issues[issue.id] = {
+                    key: issue.key,
+                    summary: issue.fields.summary,
+                    parentKey,
+                    parentId,
+                    parentSummary,
+                    status,
+                    statusColor,
+                    parentStatus,
+                    parentStatusColor,
+                    project,
+                    issueType
+                };
             });
 
             deferred.resolve({ users, logs: cleanedLogs, issues });

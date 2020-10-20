@@ -65,7 +65,7 @@
             var jiraLink = JIRA.config.host + "/browse/" + issue.key;
 
             return "<span class='mdl-chip' id='log" + log.id + "'><a target='_blank' href='" + jiraLink + "' class='mdl-chip__text'>" + issue.key + "</a></span>"
-            + `<span class='issue-status noselect'>${issue.status}</span>`
+            + `<span class='issue-status noselect' style="background-color: ${this.mapStatusColor(issue.statusColor)};">${issue.status}</span>`
                 + "<div>" + this.keepFirstN(issue.summary, 256) || '' + "</div>";
         }
 
@@ -76,7 +76,7 @@
         const jiraParentLink = JIRA.config.host + "/browse/" + issue.parentKey;
 
         return issue.parentKey ? `<span class="mdl-chip" id="parent-${log.id}"><a target="_blank" href="${jiraParentLink}" class="mdl-chip__text">${issue.parentKey}</a></span>
-            <span class='issue-status noselect'>${issue.parentStatus}</span>
+            <span class='issue-status noselect' style="background-color: ${this.mapStatusColor(issue.parentStatusColor)};">${issue.parentStatus}</span>
                 <div>${this.keepFirstN(issue.parentSummary, 256) || ''}</div>` : '';
     },
     keepFirstN: function (t, n = 32) {
@@ -84,5 +84,15 @@
             return t.substr(0, n) + (t.length > n ? ' ...' : ''); 
         }
         return '';
+    },
+    mapStatusColor: function(color) {
+        switch(color) {
+            case 'yellow':
+                return 'orange';
+            case 'blue-gray':
+                return 'blue';
+            default:
+                return color;
+        }
     }
 }
