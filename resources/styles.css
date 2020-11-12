@@ -156,6 +156,7 @@ a {
   #aggregate {
       max-height: 85%;
       overflow-y: auto;
+      border-radius: 5px;;
   }
 
   #aggregate table {
