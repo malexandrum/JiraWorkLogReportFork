@@ -8,3 +8,8 @@ To add to chrome:
 - Load Unpacked and choose the root dir of this repo
 - Invoke the extension and add your Jira url. Authentication is done via cookie, so make sure you can access Jira in the same browser profile
 
+## Update
+### If you cloned the repo
+Pull changes and then go to extensions and reload extension
+### If you downloaded zip
+Re-download and overwrite then go to extensions and reload extension
