@@ -4,7 +4,9 @@
         return {
             timeFrame: $('.option-time-frame').val(),
             groupBy: $('.option-group-by').val(),
-            dateSort: $('.option-date-sort').val()
+            dateSort: $('.option-date-sort').val(),
+            start: $('#start-date').val(),
+            end: $('#end-date').val()
         };
     },
     getfilteredLogs: function (config) {
@@ -20,16 +22,23 @@
         switch (config.timeFrame) {
             case '1WK':
                 startDate = Utility.getWeekStartDate();
+                endDate = Utility.getTomorrow();
                 break;
             case '1MO':
                 startDate = Utility.getMonthStartDate();
+                endDate = Utility.getTomorrow();
                 break;
             case 'Q':
                 startDate = Utility.getCalendarQuarterStartDate();
+                endDate = Utility.getTomorrow();
                 break;
             case 'PQ':
                 startDate = Utility.getCalendarPreviousQuarterStartDate();
                 endDate = Utility.getCalendarQuarterStartDate();
+                break;
+            case 'C':
+                startDate = Utility.getStart();
+                endDate = Utility.getEnd();
                 break;
             default:
                 console.error('Unknown period option: ', config.timeFrame);
@@ -160,7 +169,11 @@
 
         var { startDate, endDate } = this.getStartEndDates();
 
-        // var fromDate = new Date(Math.min(Utility.getMonthStartDate(), Utility.getCalendarQuarterStartDate()));
+        if (endDate && endDate.getTime() - startDate.getTime() > 366 * Utility.MILLISINDAY) {
+            alert('Maxmium reporting period is one year');
+            return;
+        }
+
         JIRA.config = selectedTeam;
         JIRA.getWorkLogs(startDate, endDate).done(function (data) {
             $('.jira-api-call-progress').hide();
@@ -196,6 +209,16 @@ $(document).ready(function () {
     $('.report-config-panel select').change(function () {
         Report.selectionChanged($(this));
     });
+
+    Utility.setStartEnd();
+    $('.option-time-frame').change(Utility.setStartEnd);
+
+    $('#start-date,#end-date').on('keypress',function(e) {
+        if(e.which == 13) {
+            $('.option-time-frame').val('C');
+            Report.selectionChanged($(this));        
+        }
+    }); 
 });
 
 function renderAggregatesContainer() {

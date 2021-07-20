@@ -170,3 +170,7 @@ a {
     border: 1px solid gray;
     padding: 1px 5px;
 }
+
+.input-date {
+    width: 100px;
+}

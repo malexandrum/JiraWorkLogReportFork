@@ -1,5 +1,6 @@
 ﻿var Utility = {
     days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    MILLISINDAY: 24 * 60 * 60 * 1000,
     getDate: function (dateString) {
         var dt = new Date(dateString);
         return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
@@ -37,11 +38,11 @@
     },
     getWeekStartDate: function () {
         var today = Utility.getDate(new Date());
-        return new Date(today.getTime() - 6 * 24 * 3600000);
+        return new Date(today.getTime() - 6 * Utility.MILLISINDAY);
     },
     getMonthStartDate: function () {
         var today = Utility.getDate(new Date());
-        return new Date(today.getTime() - 29 * 24 * 3600000);
+        return new Date(today.getTime() - 29 * Utility.MILLISINDAY);
     },
     getCalendarQuarterStartDate: function () {
         const currentTime = new Date();
@@ -53,6 +54,44 @@
         const result = this.getCalendarQuarterStartDate();
         result.setMonth(result.getMonth() - 3);
         return result;
+    },
+    getStart: function() {
+        const config = Report.getRenderConfig();
+        const start = new Date(config.start);
+        if (isNaN(start.getTime())) {
+            alert('Invalid Start Date');
+            return;
+        }
+        return start;
+    },
+    getEnd: function() {
+        const config = Report.getRenderConfig();
+        let end = new Date(config.end);
+        end = new Date(end.getTime() + Utility.MILLISINDAY);
+        if (isNaN(end.getTime())) {
+            alert('Invalid End Date');
+            return;
+        }
+        return end;
+    },
+    getTomorrow: function() {
+        // this will not work well on day summer time ends (will not include today's stories)
+        const t = new Date();
+        t.setMilliseconds(0);
+        t.setSeconds(0);
+        t.setMinutes(0);
+        t.setHours(0);
+        return new Date(t.getTime() + Utility.MILLISINDAY);
+    },
+    getWorkDays: function(start, end) {
+        // TODO
+        return;
+    },
+    setStartEnd: function() {        
+        let {startDate, endDate} = Report.getStartEndDates();
+        endDate = new Date(endDate.getTime() - Utility.MILLISINDAY);
+        $('#start-date').val(startDate ? startDate.toLocaleDateString() : '');
+        $('#end-date').val(endDate ? endDate.toLocaleDateString() : '');
     },
     sum: function (arr, prop) {
         return _.reduce(arr, function (sum, elem) {
@@ -96,3 +135,5 @@
         }
     }
 }
+
+// export default {Utility}
