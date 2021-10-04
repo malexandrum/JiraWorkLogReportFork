@@ -383,7 +383,7 @@ function renderLoggedByProjectIssueType(logs, issues) {
         tr.appendChild(td3);
         const td4 = document.createElement('td');
         td4.style.fontSize = 'smaller';
-        td4.innerHTML = sortIssueKeys(l.issueKeys).map(ik => (`<a target=_blank href="${config.host}/browse/${ik}">${ik}</a>`)).join(' ');
+        td4.innerHTML = sortIssueKeys(l.issueKeys).map(ik => (`<a target=_blank href="${config.host}/browse/${ik}">${ik}</a>`)).join(', ');
         tr.appendChild(td4)
         t1.appendChild(tr)
     });
