@@ -170,7 +170,7 @@
                 var numLogs = dailyLog.logs.length;
                 %>
                 <tr>
-                    <td class="mdl-data-table__cell--non-numeric" rowspan="<%= numLogs %>"><%= Utility.getDateFormatted(dailyLog.date) %></td>
+                    <td class="mdl-data-table__cell--non-numeric" rowspan="<%= numLogs %>"><%= Utility.getDateFormatted(dailyLog.date, true) %></td>
                     <td rowspan="<%= numLogs %>"><%= Utility.getTimeFormatted(dailyLog.totalTime) %></td>
                     <td class="mdl-data-table__cell--non-numeric"><%= Utility.getParent(dailyLog.logs[0]) %></td>
                     <td class="mdl-data-table__cell--non-numeric"><%= Utility.getIssue(dailyLog.logs[0]) %></td>
