@@ -170,7 +170,7 @@
         var { startDate, endDate } = this.getStartEndDates();
 
         if (endDate && endDate.getTime() - startDate.getTime() > 366 * Utility.MILLISINDAY) {
-            alert('Maxmium reporting period is one year');
+            alert('Maximum reporting period is one year');
             return;
         }
 
