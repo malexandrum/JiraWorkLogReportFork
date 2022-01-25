@@ -359,9 +359,8 @@ function renderConfigurableReport(logs, issues) {
             const cell = document.createElement('td')
             cell.innerHTML = l[field];
             field === 'issueKey' && (cell.style = 'font-size: smaller;')
-            field === 'time' && (cell.style = 'text-align: right;')
-            field === 'month' && (cell.style = 'white-space: nowrap;')
-            field === 'time' && (cell.style = 'white-space: nowrap;')
+            field === 'time' && (cell.style = 'text-align: right; white-space: nowrap;')
+            field === 'month' && (cell.style = 'white-space: nowrap;')            
             row.appendChild(cell)
         })
         t1.appendChild(row);
