@@ -55,7 +55,7 @@
         result.setMonth(result.getMonth() - 3);
         return result;
     },
-    getStart: function() {
+    getStart: function () {
         const config = Report.getRenderConfig();
         const start = new Date(config.start);
         if (isNaN(start.getTime())) {
@@ -64,7 +64,7 @@
         }
         return start;
     },
-    getEnd: function() {
+    getEnd: function () {
         const config = Report.getRenderConfig();
         let end = new Date(config.end);
         end = new Date(end.getTime() + Utility.MILLISINDAY);
@@ -74,7 +74,7 @@
         }
         return end;
     },
-    getTomorrow: function() {
+    getTomorrow: function () {
         // this will not work well on day summer time ends (will not include today's stories)
         const t = new Date();
         t.setMilliseconds(0);
@@ -83,12 +83,12 @@
         t.setHours(0);
         return new Date(t.getTime() + Utility.MILLISINDAY);
     },
-    getWorkDays: function(start, end) {
+    getWorkDays: function (start, end) {
         // TODO
         return;
     },
-    setStartEnd: function() {        
-        let {startDate, endDate} = Report.getStartEndDates();
+    setStartEnd: function () {
+        let { startDate, endDate } = Report.getStartEndDates();
         endDate = new Date(endDate.getTime() - Utility.MILLISINDAY);
         $('#start-date').val(startDate ? startDate.toLocaleDateString() : '');
         $('#end-date').val(endDate ? endDate.toLocaleDateString() : '');
@@ -104,7 +104,7 @@
             var jiraLink = JIRA.config.host + "/browse/" + issue.key;
 
             return "<span class='mdl-chip' id='log" + log.id + "'><a target='_blank' href='" + jiraLink + "' class='mdl-chip__text'>" + issue.key + "</a></span>"
-            + `<span class='issue-status noselect' style="background-color: ${this.mapStatusColor(issue.statusColor)};">${issue.status}</span>`
+                + `<span class='issue-status noselect' style="background-color: ${this.mapStatusColor(issue.statusColor)};">${issue.status}</span>`
                 + "<div>" + this.keepFirstN(issue.summary, 256) || '' + "</div>";
         }
 
@@ -120,12 +120,12 @@
     },
     keepFirstN: function (t, n = 32) {
         if (t) {
-            return t.substr(0, n) + (t.length > n ? ' ...' : ''); 
+            return t.substr(0, n) + (t.length > n ? ' ...' : '');
         }
         return '';
     },
-    mapStatusColor: function(color) {
-        switch(color) {
+    mapStatusColor: function (color) {
+        switch (color) {
             case 'yellow':
                 return 'orange';
             case 'blue-gray':
@@ -133,6 +133,33 @@
             default:
                 return color;
         }
+    },
+    groupArrayByProps: function (arr, groupByProps, reducers, renderers) {
+        const h = {}
+        arr.forEach(item => {
+            const keyArr = groupByProps.map(gp => item[gp])
+
+            const key = JSON.stringify(keyArr)
+            h[key] = h[key] || []
+            reducers.forEach((reducer, i) => {
+                h[key][i] = h[key][i] || []
+                h[key][i].push(item[reducer.field])
+            })
+        })
+        const res = []
+        Object.keys(h).sort().forEach(k => {
+            h[k] = h[k].map((v, i) => v.reduce(reducers[i].fn))
+            const row = {}
+            const keyArr = JSON.parse(k)
+            groupByProps.forEach((gp, i) => {
+                row[gp] = keyArr[i]
+            })
+            reducers.forEach((reducer, i) => {
+                row[reducer.field] = renderers && renderers[reducer.field] ? renderers[reducer.field](h[k][i]) : h[k][i]
+            })
+            res.push(row)
+        })
+        return res;
     }
 }
 

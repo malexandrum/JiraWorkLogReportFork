@@ -104,6 +104,7 @@
 
         renderAggregatesContainer();
         renderLoggedByProjectIssueType(logs, Report.data.issues)
+        renderLoggedByProjectIssueMonthUser(logs, Report.data.issues)
         renderLoggedByUser(logs)
     },
     selectionChanged: function ($item) {
@@ -213,12 +214,12 @@ $(document).ready(function () {
     Utility.setStartEnd();
     $('.option-time-frame').change(Utility.setStartEnd);
 
-    $('#start-date,#end-date').on('keypress',function(e) {
-        if(e.which == 13) {
+    $('#start-date,#end-date').on('keypress', function (e) {
+        if (e.which == 13) {
             $('.option-time-frame').val('C');
-            Report.selectionChanged($(this));        
+            Report.selectionChanged($(this));
         }
-    }); 
+    });
 });
 
 function renderAggregatesContainer() {
@@ -410,4 +411,59 @@ function renderLoggedByProjectIssueType(logs, issues) {
         return `${split[0]}-` + `${split[1]}`.padStart(10, '0')
     }
 
+}
+
+function renderLoggedByProjectIssueMonthUser(logs, issues) {
+    const data = logs.map(l => {
+        // if subtask, get parent's issueType        
+        const { parentId } = issues[l.issueId];
+        let issueType = issues[l.issueId].issueType.name;
+        if (parentId && issues[parentId].issueType.name !== 'Epic') {
+            issueType = issues[parentId].issueType.name
+        }
+        return ({
+            project: issues[l.issueId].project && issues[l.issueId].project.name,
+            issueType: issueType,
+            month: l.date && l.date.toISOString().substr(0, 7),
+            user: l.userDisplayName,
+            time: l.time,
+            issueKey: issues[l.issueId].key
+        });
+    });
+
+    const grouppedData = Utility.groupArrayByProps(data, ['project', 'issueType', 'month', 'user'], [
+        { field: 'time', fn: (a, b) => a + b },
+        { field: 'issueKey', fn: (a, b) => (!a ? b : `${a}, ${b || ''}`) }
+    ],
+        {
+            time: v => ((+v / 3600).toFixed(2)),
+        }
+    )
+
+    const el = document.getElementById('aggregate');
+    el.insertAdjacentHTML('beforeend', '<br>');
+
+    const t1 = document.createElement('table');
+
+    t1.insertAdjacentHTML('afterbegin', `<tr><th>Project</th><th>Issue Type</th><th>Month</th><th>User</th><th>Hours</th><th>Issues</th></tr>`);
+
+    grouppedData.forEach(l => {
+        const row = document.createElement('tr');
+        [
+            'project',
+            'issueType',
+            'month',
+            'user',
+            'time',
+            'issueKey'
+        ].forEach(field => {
+            const cell = document.createElement('td')
+            cell.innerText = l[field];
+            field === 'issueKey' && (cell.style = 'font-size: smaller;')
+            row.appendChild(cell)
+        })
+        t1.appendChild(row);
+    })
+
+    el.appendChild(t1)
 }
