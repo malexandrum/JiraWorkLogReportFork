@@ -1,4 +1,6 @@
-﻿var Configuration = {
+﻿const DEFAULT_GROUPBY = `["project", "issueType", "month"]`;
+
+var Configuration = {
     saveUserSelection: function (teamId, currentSelection) {
         var savedSelections = Configuration.getUserSelection(teamId) || [];
 
@@ -63,6 +65,7 @@
             id: parseInt($container.data('id')),
             name: $.trim($container.find('.config-name').val()).toUpperCase(),
             host: $.trim($container.find('.config-host').val()).toLowerCase(),
+            groupBy: $.trim($container.find('.config-groupby').val().replaceAll("&quot;", '"')),
             username: $.trim($container.find('.config-username').val()),
             password: $.trim($container.find('.config-password').val())
         };
@@ -92,12 +95,12 @@
         Configuration.renderContent();
     },
     renderContent: function () {
-        var newConfig = { id: 0, name: '', host: '', username: '', password: '' };
+        var newConfig = { id: 0, name: '', host: '', groupBy: DEFAULT_GROUPBY, username: '', password: '' };
         var configs = Configuration.getConfigs();
         configs.push(newConfig);
 
         var template = _.template($("#tmpl-config-section").html());
-        $('.config-sections').html(template({ configs: configs }));
+        $('.config-sections').html(template({ configs }));
     },
     renderDialog: function () {
         Configuration.renderContent();

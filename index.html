@@ -115,6 +115,10 @@
                         <input type="password" class="config-password mdl-textfield__input" value="<%= configs[i].password %>" />
                     </div>
                 -->
+                    <div class="mdl-textfield config-host-container mdl-js-textfield">
+                        <label>Group By Columns JSON<br>[&quot;project&quot;,&quot;issueType&quot;,&quot;month&quot;,&quot;user&quot;]:</label>
+                        <input type="text" class="config-groupby mdl-textfield__input" placeholder="" value="<%= configs[i].groupBy && configs[i].groupBy.replaceAll('\"', '&quot;') %>" />
+                    </div>
                     <div class="config-save-alert" style="display:none">
                     </div>
                 </div>

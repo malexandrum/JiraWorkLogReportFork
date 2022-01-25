@@ -103,8 +103,7 @@
         componentHandler.upgradeAllRegistered();
 
         renderAggregatesContainer();
-        renderLoggedByProjectIssueType(logs, Report.data.issues)
-        renderLoggedByProjectIssueMonthUser(logs, Report.data.issues)
+        renderConfigurableReport(logs, Report.data.issues)
         renderLoggedByUser(logs)
     },
     selectionChanged: function ($item) {
@@ -303,117 +302,9 @@ function renderLoggedByUser(worklogs) {
     });
 }
 
-function renderLoggedByProjectIssueType(logs, issues) {
-    const loggedByProjectIssueType = {}, projectsById = {}, issueTypesById = {};
-    logs.forEach(log => {
-        let issue = issues[log.issueId];
-        const key = issue.key;
-        let { project, issueType } = issue;
-        if (issue.parentKey && issues[issue.parentId].issueType.name !== 'Epic') {
-            issueType = issues[issue.parentId].issueType
-        }
-        projectsById[project.id] = project;
-        issueTypesById[issueType.id] = issueType;
-        if (loggedByProjectIssueType[project.id]) {
-            if (loggedByProjectIssueType[project.id][issueType.id]) {
-                loggedByProjectIssueType[project.id][issueType.id].time += log.time;
-                if (loggedByProjectIssueType[project.id][issueType.id].issueKeys.indexOf(key) === -1) {
-                    loggedByProjectIssueType[project.id][issueType.id].issueKeys.push(key);
-                }
-            } else {
-                loggedByProjectIssueType[project.id][issueType.id] = { time: log.time, issueKeys: [key] };
-            }
-        } else {
-            loggedByProjectIssueType[project.id] = { [issueType.id]: { time: log.time, issueKeys: [key] } }
-        }
-
-    });
-
-    Report.data.loggedByProject = loggedByProjectIssueType;
-
-    const el = document.getElementById('aggregate');
-    el.insertAdjacentHTML('beforeend', '<br>');
-
-    const t1 = document.createElement('table');
-
-    t1.insertAdjacentHTML('afterbegin', `<tr><th>Project</th><th>Issue Type</th><th>Hours</th><th>Issues</th></tr>`);
-
-    const lines = [];
-
-    for (const projectId in loggedByProjectIssueType) {
-        const project = projectsById[projectId];
-
-        const projectLines = []
-        for (const issueTypeId in loggedByProjectIssueType[projectId]) {
-            const issueType = issueTypesById[issueTypeId];
-            const time = loggedByProjectIssueType[projectId][issueTypeId].time;
-            const issueKeys = loggedByProjectIssueType[projectId][issueTypeId].issueKeys;
-            projectLines.push({
-                project: project.name,
-                issueType: issueType.name,
-                time,
-                issueKeys
-            });
-        }
-        projectLines.sort((a, b) => b.time - a.time)
-        lines.push(...projectLines);
-    }
-
-    let projectName;
-
-    const config = Configuration.getCurrentConfig();
-
-    lines.forEach(l => {
-        const { project, issueType, time } = l;
-        let tr = document.createElement('tr');
-        const td1 = document.createElement('td');
-        // td1.rowSpan = Object.keys(loggedByProjectIssueType[projectId]).length;
-        td1.innerHTML = project;
-        if (project === projectName) {
-            td1.style.opacity = .3
-        }
-        projectName = project;
-
-        tr.appendChild(td1);
-        const td2 = document.createElement('td');
-        td2.innerHTML = issueType
-        tr.appendChild(td2);
-        const td3 = document.createElement('td');
-        td3.innerHTML = (time / 3600).toFixed(2);
-        td3.style.textAlign = 'right';
-        tr.appendChild(td3);
-        const td4 = document.createElement('td');
-        td4.style.fontSize = 'smaller';
-        td4.innerHTML = sortIssueKeys(l.issueKeys).map(ik => (`<a target=_blank href="${config.host}/browse/${ik}">${ik}</a>`)).join(', ');
-        tr.appendChild(td4)
-        t1.appendChild(tr)
-    });
 
 
-    el.appendChild(t1);
-
-    function sortIssueKeys(arr) {
-        arr.sort((a, b) => {
-            const normalizedA = normalizeIssueKey(a);
-            const normalizedB = normalizeIssueKey(b);
-            if (normalizedA < normalizedB) {
-                return -1;
-            } else if (normalizedA === normalizedB) {
-                return 0;
-            }
-            return 1;
-        })
-        return arr;
-    }
-
-    function normalizeIssueKey(k) {
-        const split = k.split('-');
-        return `${split[0]}-` + `${split[1]}`.padStart(10, '0')
-    }
-
-}
-
-function renderLoggedByProjectIssueMonthUser(logs, issues) {
+function renderConfigurableReport(logs, issues) {
     const data = logs.map(l => {
         // if subtask, get parent's issueType        
         const { parentId } = issues[l.issueId];
@@ -431,12 +322,21 @@ function renderLoggedByProjectIssueMonthUser(logs, issues) {
         });
     });
 
-    const grouppedData = Utility.groupArrayByProps(data, ['project', 'issueType', 'month', 'user'], [
-        { field: 'time', fn: (a, b) => a + b },
-        { field: 'issueKey', fn: (a, b) => (!a ? b : `${a}, ${b || ''}`) }
+    let groupBy = [];
+    try {
+        groupBy = JSON.parse(Configuration.getCurrentConfig().groupBy || DEFAULT_GROUPBY);
+    } catch(ex) {
+        alert(`Group By Column setting could not be parsed. Using default. ${ex}`);
+        groupBy = JSON.parse(DEFAULT_GROUPBY);
+    }
+    
+    const grouppedData = Utility.groupArrayByProps(data, groupBy, [
+        { field: 'time', fn: (a, b) => a + b, initialValue: 0 },
+        { field: 'issueKey', fn: (a, b) => (a.indexOf(b) === -1 ? [...a, b] : a), initialValue: [] },
     ],
         {
             time: v => ((+v / 3600).toFixed(2)),
+            issueKey: storyKeys => storyKeys.sort().map(sk => `<a href="${Configuration.getCurrentConfig().host}/browse/${sk}" target="_blank">${sk}</a>`).join(', ')
         }
     )
 
@@ -445,21 +345,23 @@ function renderLoggedByProjectIssueMonthUser(logs, issues) {
 
     const t1 = document.createElement('table');
 
-    t1.insertAdjacentHTML('afterbegin', `<tr><th>Project</th><th>Issue Type</th><th>Month</th><th>User</th><th>Hours</th><th>Issues</th></tr>`);
+    const columns = groupBy.concat([
+        'time',
+        'issueKey'
+    ]);
+
+    const th = `<tr>${columns.map(c => "<th>"+c+"</th>").join('')}</tr>`;
+    t1.insertAdjacentHTML('afterbegin', th);
 
     grouppedData.forEach(l => {
         const row = document.createElement('tr');
-        [
-            'project',
-            'issueType',
-            'month',
-            'user',
-            'time',
-            'issueKey'
-        ].forEach(field => {
+        columns.forEach(field => {
             const cell = document.createElement('td')
-            cell.innerText = l[field];
+            cell.innerHTML = l[field];
             field === 'issueKey' && (cell.style = 'font-size: smaller;')
+            field === 'time' && (cell.style = 'text-align: right;')
+            field === 'month' && (cell.style = 'white-space: nowrap;')
+            field === 'time' && (cell.style = 'white-space: nowrap;')
             row.appendChild(cell)
         })
         t1.appendChild(row);

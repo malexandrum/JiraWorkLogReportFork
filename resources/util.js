@@ -148,7 +148,7 @@
         })
         const res = []
         Object.keys(h).sort().forEach(k => {
-            h[k] = h[k].map((v, i) => v.reduce(reducers[i].fn))
+            h[k] = h[k].map((v, i) => v.reduce(reducers[i].fn, reducers[i].initialValue))
             const row = {}
             const keyArr = JSON.parse(k)
             groupByProps.forEach((gp, i) => {
