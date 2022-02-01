@@ -125,7 +125,7 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
                     issueId: log.issueId,
                     id: log.id
                 };
-            });
+            }).sort((a, b) => (a.date.getTime() - b.date.getTime()));
     
             //Get JIRA Issues
             var issueIds = _.uniq(_.pluck(logs, 'issueId'));
