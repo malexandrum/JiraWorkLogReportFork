@@ -9,7 +9,7 @@ JIRA.restCall = function (apiUrl, method, data) {
     var deferred = $.Deferred();
 
     var request = {
-        url: JIRA.config.host + '/rest/api/2/' + apiUrl,
+        url: JIRA.config.host + '/rest/api/3/' + apiUrl,
         dataType: "json",
         crossDomain: true,
         contentType: "application/json",
@@ -120,7 +120,7 @@ JIRA._listLogs = function (ids, logs = [], startAt = 0, deferred = $.Deferred())
                     username: log.author.accountId,
                     userDisplayName: log.author.displayName,
                     time: log.timeSpentSeconds,
-                    comment: log.comment,
+                    comment: log.comment && log.comment.content && log.comment.content[0] && log.comment.content[0].content && log.comment.content[0].content.map(c=>c.text).join(' '),
                     created: log.created,
                     issueId: log.issueId,
                     id: log.id
