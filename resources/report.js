@@ -315,6 +315,7 @@ function renderConfigurableReport(logs, issues) {
         return ({
             project: issues[l.issueId].project && issues[l.issueId].project.name,
             issueType: issueType,
+            issueName: issues[l.issueId].parentSummary ?? issues[l.issueId].summary,
             month: l.date && l.date.toISOString().substr(0, 7),
             user: l.userDisplayName,
             time: l.time,
