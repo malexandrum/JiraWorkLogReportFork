@@ -1,4 +1,4 @@
-﻿const DEFAULT_GROUPBY = `["project", "issueType", "month"]`;
+﻿const DEFAULT_GROUPBY = `["project", "issueType", "month", "parentKey"]`;
 
 var Configuration = {
     saveUserSelection: function (teamId, currentSelection) {

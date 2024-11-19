@@ -318,7 +318,8 @@ function renderConfigurableReport(logs, issues) {
             month: l.date && l.date.toISOString().substr(0, 7),
             user: l.userDisplayName,
             time: l.time,
-            issueKey: issues[l.issueId].key
+            issueKey: issues[l.issueId].key,
+            parentKey: issues[l.issueId].parentKey
         });
     });
 
