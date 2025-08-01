@@ -210,7 +210,7 @@ JIRA._getIssues = function (issueIds, issues = [], deferred = $.Deferred()) {
         };
 
         JIRA.restCall('search', 'POST', request).done(function (resp) {
-            issues.push(...resp.issues); // safe, no threads in JS
+            issues.push(...resp.issues);
             if (++counter === jobCount) {
                 deferred.resolve(issues);
             }
