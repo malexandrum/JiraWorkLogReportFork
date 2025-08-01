@@ -97,9 +97,9 @@
             Report.getLogsGroupedByDate(logs, renderConfig);
 
         var templateId = renderConfig.groupBy == "DT" ? "#tmpl-logs-by-date" : "#tmpl-logs-by-user";
-        var template = _.template($(templateId).html());
-
-        $('.report-content').html(template({ data: reportData, users: Report.data.usersByName }));
+        var templateHtml = $(templateId).html();
+        var renderedHtml = renderReportTemplate(templateHtml, { data: reportData, users: Report.data.usersByName });
+        $('.report-content').html(renderedHtml);
         componentHandler.upgradeAllRegistered();
 
         renderAggregatesContainer();
@@ -325,7 +325,7 @@ function renderConfigurableReport(logs, issues) {
             issueType: issueType,
             issueName: issueName,
             epicName: epicName,
-            month: l.date && l.date.toISOString().substr(0, 7) + '-01',,
+            month: l.date && l.date.toISOString().substr(0, 7) + '-01',
             user: l.userDisplayName,
             time: l.time,
             issueKey: issues[l.issueId].key,

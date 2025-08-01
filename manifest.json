@@ -1,22 +1,32 @@
 {
-   "background": {
-      "persistent": false,
-      "scripts": [ "background.js" ]
-   },
-   "browser_action": {
-      "default_title": "JIRA Worklog Report"
-   },
-   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+   "manifest_version": 3,
+   "name": "JIRA Work Log Report - malexandrum",
+   "version": "1.2.1.2",
    "description": "An extension that shows work log report weekly to quarterly. It fetches data from JIRA REST API.",
    "icons": {
       "128": "icons/128.png",
       "16": "icons/16.png",
       "48": "icons/48.png"
    },
-   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhZEFrOBpHMZY59yCMLSPWs2+8qYDRGHlbcrN72ku4xwBOscBLQlorRAkdZwkiC3iODy4+ftRWVJcLfFqLz5a+0IKdtp53RWcFQ/Ggm3b7d88SUnneoTEMAshB9DXOyHeF3L4fPY7jVCyvwMIzllMKPvEeVgAzlAO4nDT9WLkTbAdQxQLKDIbyz79pz/YIaOlIIyS0oHoPy4b4AJDJ4df3L/EeWOTWQWCaqIHMAMCGZIHfDvcbcvHTWOO8/EYcpaVBXzE3yaD8M0iMS0Oxj+uQt3jq1KrK78O2pXw1hR7FqAizouwXDTBL19wAl/hjDZGoUq67axY87vlNkdE2DixWwIDAQAB",
-   "manifest_version": 2,
-   "name": "JIRA Work Log Report - malexandrum",
-   "permissions": [ "https://*.atlassian.net/", "http://*.atlassian.net/" ],
-   "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.2.0.0"
+   "background": {
+      "service_worker": "background.js"
+   },
+   "action": {
+      "default_title": "JIRA Worklog Report"
+   },
+   "permissions": [
+      "activeTab",
+      "storage"
+   ],
+   "host_permissions": [
+      "https://*.atlassian.net/*",
+      "http://*.atlassian.net/*",
+      "https://*.atlassian.com/*",
+      "http://*.atlassian.com/*",
+      "https://*/*",
+      "http://*/*"
+   ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   }
 }
