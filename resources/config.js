@@ -99,8 +99,9 @@ var Configuration = {
         var configs = Configuration.getConfigs();
         configs.push(newConfig);
 
-        var template = _.template($("#tmpl-config-section").html());
-        $('.config-sections').html(template({ configs }));
+        var templateHtml = $("#tmpl-config-section").html();
+        var renderedHtml = renderConfigTemplate(templateHtml, { configs });
+        $('.config-sections').html(renderedHtml);
     },
     renderDialog: function () {
         Configuration.renderContent();

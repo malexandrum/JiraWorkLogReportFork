@@ -97,9 +97,9 @@
             Report.getLogsGroupedByDate(logs, renderConfig);
 
         var templateId = renderConfig.groupBy == "DT" ? "#tmpl-logs-by-date" : "#tmpl-logs-by-user";
-        var template = _.template($(templateId).html());
-
-        $('.report-content').html(template({ data: reportData, users: Report.data.usersByName }));
+        var templateHtml = $(templateId).html();
+        var renderedHtml = renderReportTemplate(templateHtml, { data: reportData, users: Report.data.usersByName });
+        $('.report-content').html(renderedHtml);
         componentHandler.upgradeAllRegistered();
 
         renderAggregatesContainer();
@@ -312,10 +312,20 @@ function renderConfigurableReport(logs, issues) {
         if (parentId && issues[parentId].issueType.name !== 'Epic') {
             issueType = issues[parentId].issueType.name
         }
+        let issueName = issues[l.issueId].parentSummary ?? issues[l.issueId].summary;
+        let epicName = '';  
+        if (parentId && issues[parentId].issueType.name !== 'Epic') {
+            epicName = issues[parentId].parentSummary;
+        } else {
+            epicName = issues[l.issueId].parentSummary;
+            issueName = issues[l.issueId].summary;
+        }
         return ({
             project: issues[l.issueId].project && issues[l.issueId].project.name,
             issueType: issueType,
-            month: l.date && l.date.toISOString().substr(0, 7),
+            issueName: issueName,
+            epicName: epicName,
+            month: l.date && l.date.toISOString().substr(0, 7) + '-01',
             user: l.userDisplayName,
             time: l.time,
             issueKey: issues[l.issueId].key,
