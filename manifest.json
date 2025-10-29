@@ -1,7 +1,7 @@
 {
    "manifest_version": 3,
    "name": "JIRA Work Log Report - malexandrum",
-   "version": "1.2.1.2",
+   "version": "1.2.1.4",
    "description": "An extension that shows work log report weekly to quarterly. It fetches data from JIRA REST API.",
    "icons": {
       "128": "icons/128.png",

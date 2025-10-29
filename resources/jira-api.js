@@ -195,9 +195,9 @@ JIRA._getIssues = function (issueIds, issues = [], deferred = $.Deferred()) {
     }
     for (let i = 0; i < issueIds.length; i += JIRA.const.MAX_SEARCH_RESULTS) {
         var request = {
-            jql: "id in (" + issueIds.slice(i, i+JIRA.const.MAX_SEARCH_RESULTS).join(',') + ") order by key DESC",
-            maxResults: JIRA.const.MAX_SEARCH_RESULTS,
-            fields: [
+            "issueIdsOrKeys": issueIds.slice(i, i+JIRA.const.MAX_SEARCH_RESULTS),
+            // maxResults: JIRA.const.MAX_SEARCH_RESULTS,
+            "fields": [
                 "summary",
                 "key",
                 "parent",
@@ -205,11 +205,14 @@ JIRA._getIssues = function (issueIds, issues = [], deferred = $.Deferred()) {
                 "project",
                 "issuetype"
             ],
-            fieldsByKeys: false,
-            startAt: issues.length
+            "fieldsByKeys": false,
+            "expand": [
+                "names"
+            ],
+            // startAt: issues.length
         };
 
-        JIRA.restCall('search', 'POST', request).done(function (resp) {
+        JIRA.restCall('issue/bulkfetch', 'POST', request).done(function (resp) {
             issues.push(...resp.issues);
             if (++counter === jobCount) {
                 deferred.resolve(issues);
